@@ -129,11 +129,16 @@ abstract class Relation {
 	 */
 	public function getAndResetWheres()
 	{
+		// Use this to check if the table.deleted_at = null is actually present
+		// in the wheres of the base query.
+		$front = $this->getBaseQuery()->wheres[0];
+		$modelDeletedAt = $this->query->getModel()->getTable().'.deleted_at';
+		
 		// When a model is "soft deleting", the "deleted at" where clause will be the
 		// first where clause on the relationship query, so we will actually clear
 		// the second where clause as that is the lazy loading relations clause.
-		if ($this->query->getModel()->isSoftDeleting())
-		{
+		if ($this->query->getModel()->isSoftDeleting() and $front['column'] === $modelDeletedAt)
+		{	
 			$this->removeSecondWhereClause();
 		}
 
